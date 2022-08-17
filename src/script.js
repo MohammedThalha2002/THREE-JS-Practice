@@ -23,5 +23,15 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 
+let time = Date.now()
+
 function animate() {
-    requ
+    const currentTime = Date.now()
+    const deltaTime = currentTime - time
+    time = currentTime
+
+    renderer.render(scene, camera)
+    requestAnimationFrame(animate)
+}
+animate()
+
