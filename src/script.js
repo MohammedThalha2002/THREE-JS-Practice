@@ -28,7 +28,10 @@ LoadingManager.onProgress = () => {
     console.log("Progress...")
 }
 
+
 const textureLoader = new THREE.TextureLoader(LoadingManager)
+const cubeTextureLoader = new THREE.CubeTextureLoader(LoadingManager)
+
 const colorTexture = textureLoader.load('/textures/door/door.jpg')
 const alphatTexture = textureLoader.load('/textures/door/alpha.jpg')
 const heightTexture = textureLoader.load('/textures/door/height.jpg')
@@ -37,13 +40,19 @@ const aOTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
 const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
 
+
 const scene = new THREE.Scene()
 const canvas = document.querySelector('.webgl')
 
-const geometry = new THREE.BoxGeometry(2, 2, 2)
-const material = new THREE.MeshBasicMaterial({ map: colorTexture })
+const geometry = new THREE.BoxGeometry(2, 2, 2, 100, 100)
+
+const material = new THREE.MeshStandardMaterial()
+
+gui.add(material, 'roughness', 0, 1, 0.001)
+gui.add(material, 'metalness', 0, 1, 0.001)
 
 const cube = new THREE.Mesh(geometry, material)
+geometry.setAttribute('uv2', new THREE.BufferAttribute(cube.geometry.attributes.uv.array, 2))
 scene.add(cube)
 const parameters = {
     color: 0xff0000
@@ -79,6 +88,12 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 camera.position.z = 5
 scene.add(camera)
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+scene.add(ambientLight)
+const pointLight = new THREE.PointLight(0xffffff, 0.5)
+pointLight.position.set(2, 2, 2)
+scene.add(pointLight)
+
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
 
@@ -88,12 +103,12 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(window.devicePixelRatio)
 
-let time = Date.now()
+let clock = new THREE.Clock()
 
 function animate() {
-    const currentTime = Date.now()
-    const deltaTime = currentTime - time
-    time = currentTime
+    const elapsedTime = clock.getElapsedTime()
+    cube.rotation.x = 0.1 * elapsedTime
+    cube.rotation.y = 0.1 * elapsedTime
 
     controls.update()
 
