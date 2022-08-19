@@ -46,7 +46,6 @@ const torusGenerator = (n) => {
             getRandomArbitrary(-10, 10),
         )
         Allgroup.add(torus)
-        scene.add(torus)
     }
 }
 
@@ -64,7 +63,6 @@ const cubeGenerator = (n) => {
             getRandomArbitrary(-10, 10),
         )
         Allgroup.add(cube)
-        scene.add(cube)
     }
 }
 
@@ -94,7 +92,6 @@ const font = loader.load(
         const textMaterial = new THREE.MeshNormalMaterial()
         const text = new THREE.Mesh(textGeometry, textMaterial)
         Allgroup.add(text)
-        scene.add(text)
         torusGenerator(80)
         cubeGenerator(60)
     },
@@ -155,8 +152,10 @@ window.addEventListener('dblclick', event => {
     }
 })
 
+scene.add(Allgroup)
+
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
-camera.position.z = 5
+camera.position.z = 10
 scene.add(camera)
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
@@ -182,8 +181,8 @@ console.log(Allgroup)
 
 function animate() {
     const elapsedTime = clock.getElapsedTime()
-    Allgroup.rotation.x = 10 * elapsedTime
-    Allgroup.rotation.y = 10 * elapsedTime
+    Allgroup.rotation.x = 0.2 * elapsedTime
+    Allgroup.rotation.y = 0.2 * elapsedTime
 
     controls.update()
 
