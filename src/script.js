@@ -1,6 +1,8 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import * as dat from 'dat.gui'
 const gui = new dat.GUI()
 
@@ -28,6 +30,75 @@ LoadingManager.onProgress = () => {
     console.log("Progress...")
 }
 
+const Allgroup = new THREE.Group()
+
+const torusGenerator = (n) => {
+    for (let i = 0; i < n; i++) {
+        const torusGeometry = new THREE.TorusBufferGeometry(0.3,0.15,20,45)
+        const torusMaterial = new THREE.MeshNormalMaterial()
+        const torus = new THREE.Mesh(torusGeometry, torusMaterial)
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        torus.position.set(
+            getRandomArbitrary(-10, 10),
+            getRandomArbitrary(-10, 10),
+            getRandomArbitrary(-10, 10),
+        )
+        Allgroup.add(torus)
+        scene.add(torus)
+    }
+}
+
+const cubeGenerator = (n) => {
+    for (let i = 0; i < n; i++) {
+        const cubeGeometry = new THREE.BoxGeometry(0.5,0.5,0.5)
+        const cubeMaterial = new THREE.MeshNormalMaterial()
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        cube.position.set(
+            getRandomArbitrary(-10, 10),
+            getRandomArbitrary(-10, 10),
+            getRandomArbitrary(-10, 10),
+        )
+        Allgroup.add(cube)
+        scene.add(cube)
+    }
+}
+
+const loader = new FontLoader();
+const font = loader.load(
+    // resource URL
+    'fonts/helvetiker_regular.typeface.json',
+
+    // onLoad callback
+    function (font) {
+        // do something with the font
+        const textGeometry = new TextGeometry(
+            'Thalha\nCreative dev',
+            {
+                font: font,
+                size: 0.8,
+                height: 0.4,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 5
+            }
+        )
+        textGeometry.center()
+        const textMaterial = new THREE.MeshNormalMaterial()
+        const text = new THREE.Mesh(textGeometry, textMaterial)
+        Allgroup.add(text)
+        scene.add(text)
+        torusGenerator(80)
+        cubeGenerator(60)
+    },
+);
 
 const textureLoader = new THREE.TextureLoader(LoadingManager)
 const cubeTextureLoader = new THREE.CubeTextureLoader(LoadingManager)
@@ -53,7 +124,7 @@ gui.add(material, 'metalness', 0, 1, 0.001)
 
 const cube = new THREE.Mesh(geometry, material)
 geometry.setAttribute('uv2', new THREE.BufferAttribute(cube.geometry.attributes.uv.array, 2))
-scene.add(cube)
+// scene.add(cube)
 const parameters = {
     color: 0xff0000
 }
@@ -97,6 +168,9 @@ scene.add(pointLight)
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
 
+const axisHelper = new THREE.AxesHelper()
+scene.add(axisHelper)
+
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
@@ -104,11 +178,12 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(window.devicePixelRatio)
 
 let clock = new THREE.Clock()
+console.log(Allgroup)
 
 function animate() {
     const elapsedTime = clock.getElapsedTime()
-    cube.rotation.x = 0.1 * elapsedTime
-    cube.rotation.y = 0.1 * elapsedTime
+    Allgroup.rotation.x = 10 * elapsedTime
+    Allgroup.rotation.y = 10 * elapsedTime
 
     controls.update()
 
