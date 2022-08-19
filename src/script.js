@@ -33,34 +33,44 @@ LoadingManager.onProgress = () => {
 const Allgroup = new THREE.Group()
 
 const torusGenerator = (n) => {
+    const torusGeometry = new THREE.TorusBufferGeometry(0.3, 0.15, 20, 45)
+    const torusMaterial = new THREE.MeshNormalMaterial()
     for (let i = 0; i < n; i++) {
-        const torusGeometry = new THREE.TorusBufferGeometry(0.3,0.15,20,45)
-        const torusMaterial = new THREE.MeshNormalMaterial()
         const torus = new THREE.Mesh(torusGeometry, torusMaterial)
         function getRandomArbitrary(min, max) {
             return Math.random() * (max - min) + min;
         }
         torus.position.set(
-            getRandomArbitrary(-10, 10),
-            getRandomArbitrary(-10, 10),
-            getRandomArbitrary(-10, 10),
+            getRandomArbitrary(-20, 20),
+            getRandomArbitrary(-20, 20),
+            getRandomArbitrary(-20, 20),
+        )
+        torus.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
         )
         Allgroup.add(torus)
     }
 }
 
 const cubeGenerator = (n) => {
+    const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
+    const cubeMaterial = new THREE.MeshNormalMaterial()
     for (let i = 0; i < n; i++) {
-        const cubeGeometry = new THREE.BoxGeometry(0.5,0.5,0.5)
-        const cubeMaterial = new THREE.MeshNormalMaterial()
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
         function getRandomArbitrary(min, max) {
             return Math.random() * (max - min) + min;
         }
         cube.position.set(
-            getRandomArbitrary(-10, 10),
-            getRandomArbitrary(-10, 10),
-            getRandomArbitrary(-10, 10),
+            getRandomArbitrary(-20, 20),
+            getRandomArbitrary(-20, 20),
+            getRandomArbitrary(-20, 20),
+        )
+        cube.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
         )
         Allgroup.add(cube)
     }
@@ -92,21 +102,21 @@ const font = loader.load(
         const textMaterial = new THREE.MeshNormalMaterial()
         const text = new THREE.Mesh(textGeometry, textMaterial)
         Allgroup.add(text)
-        torusGenerator(80)
-        cubeGenerator(60)
+        torusGenerator(100)
+        cubeGenerator(100)
     },
 );
 
 const textureLoader = new THREE.TextureLoader(LoadingManager)
 const cubeTextureLoader = new THREE.CubeTextureLoader(LoadingManager)
 
-const colorTexture = textureLoader.load('/textures/door/door.jpg')
-const alphatTexture = textureLoader.load('/textures/door/alpha.jpg')
-const heightTexture = textureLoader.load('/textures/door/height.jpg')
-const normalTexture = textureLoader.load('/textures/door/normal.jpg')
-const aOTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
-const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
-const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+// const colorTexture = textureLoader.load('/textures/door/door.jpg')
+// const alphatTexture = textureLoader.load('/textures/door/alpha.jpg')
+// const heightTexture = textureLoader.load('/textures/door/height.jpg')
+// const normalTexture = textureLoader.load('/textures/door/normal.jpg')
+// const aOTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+// const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+// const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
 
 
 const scene = new THREE.Scene()
@@ -153,9 +163,8 @@ window.addEventListener('dblclick', event => {
 })
 
 scene.add(Allgroup)
-
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
-camera.position.z = 10
+camera.position.z = 8
 scene.add(camera)
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
