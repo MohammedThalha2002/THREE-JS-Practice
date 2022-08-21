@@ -16,50 +16,19 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Lights
+ * Textures
  */
-// Ambient light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
-scene.add(ambientLight)
-
-// Directional light
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
-directionalLight.castShadow = true
-directionalLight.position.set(2, 2, - 1)
-gui.add(directionalLight, 'intensity').min(0).max(1).step(0.001)
-gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001)
-gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
-gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
-scene.add(directionalLight)
+const textureLoader = new THREE.TextureLoader()
 
 /**
- * Materials
+ * Particles
  */
-const material = new THREE.MeshStandardMaterial()
-material.roughness = 0.7
-gui.add(material, 'metalness').min(0).max(1).step(0.001)
-gui.add(material, 'roughness').min(0).max(1).step(0.001)
-
-/**
- * Objects
- */
-const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    material
-)
-sphere.castShadow = true
-
-const plane = new THREE.Mesh(
-    new THREE.PlaneGeometry(5, 5),
-    material
-)
-plane.receiveShadow = true
-
-plane.rotation.x = - Math.PI * 0.5
-plane.position.y = - 0.5
-
-scene.add(sphere, plane)
+const pointsGeometry = new THREE.SphereBufferGeometry(1,16,16)
+const pointsMaterial = new THREE.PointsMaterial()
+pointsMaterial.size = 0.02
+pointsMaterial.sizeAttenuation = true
+const points = new THREE.Points(pointsGeometry,pointsMaterial)
+scene.add(points)
 
 /**
  * Sizes
@@ -69,7 +38,8 @@ const sizes = {
     height: window.innerHeight
 }
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', () =>
+{
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -88,9 +58,7 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 1
-camera.position.y = 1
-camera.position.z = 2
+camera.position.z = 3
 scene.add(camera)
 
 // Controls
@@ -105,14 +73,14 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-renderer.shadowMap.enabled = true
 
 /**
  * Animate
  */
 const clock = new THREE.Clock()
 
-const tick = () => {
+const tick = () =>
+{
     const elapsedTime = clock.getElapsedTime()
 
     // Update controls
