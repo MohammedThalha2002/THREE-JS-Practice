@@ -2,6 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import { Group } from 'three'
 
 /**
  * Base
@@ -18,11 +19,12 @@ const scene = new THREE.Scene()
 /**
  * Galaxy
  */
+const galaxyGroup = new THREE.Group()
 const parameters = {}
 parameters.count = 100000
 parameters.size = 0.01
 parameters.radius = 5
-parameters.branches = 3
+parameters.branches = 6
 parameters.spin = 1
 parameters.randomness = 0.2
 parameters.randomnessPower = 3
@@ -40,7 +42,7 @@ const generateGalaxy = () =>
     {
         geometry.dispose()
         material.dispose()
-        scene.remove(points)
+        galaxyGroup.remove(points)
     }
 
     /**
@@ -99,8 +101,10 @@ const generateGalaxy = () =>
      * Points
      */
     points = new THREE.Points(geometry, material)
-    scene.add(points)
+    galaxyGroup.add(points)
 }
+
+scene.add(galaxyGroup)
 
 gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
 gui.add(parameters, 'size').min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy)
@@ -143,7 +147,7 @@ window.addEventListener('resize', () =>
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 3
-camera.position.y = 3
+camera.position.y = 0.8
 camera.position.z = 3
 scene.add(camera)
 
@@ -168,6 +172,8 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    //
+    galaxyGroup.rotation.y = elapsedTime * 0.4
 
     // Update controls
     controls.update()
