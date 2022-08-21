@@ -19,40 +19,53 @@ const scene = new THREE.Scene()
  * Textures
  */
 const textureLoader = new THREE.TextureLoader()
-const particleTexture = textureLoader.load('/textures/particles/2.png')
 
-/**
- * Particles
- */
-// const pointsGeometry = new THREE.SphereBufferGeometry(1,16,16)
-// const pointsMaterial = new THREE.PointsMaterial()
-// pointsMaterial.size = 0.02
-// pointsMaterial.sizeAttenuation = true
-// const points = new THREE.Points(pointsGeometry,pointsMaterial)
-// scene.add(points)
-
-const pointsGeometry = new THREE.BufferGeometry()
-const count = 5000
-const positions = new Float32Array(count * 3)
-const colors = new Float32Array(count * 3)
-
-for(let i =0; i< count *3; i++){
-    positions[i] = (Math.random()-0.5) * 10
-    colors[i] = Math.random()
+const parameters = {
+    count : 1000,
+    size : 0.02,
+    radius : 5,
+    branches : 3,
 }
-pointsGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-pointsGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-const pointsMaterial = new THREE.PointsMaterial()
-// pointsMaterial.color = new THREE.Color('#ff0937')
-pointsMaterial.size = 0.1
-pointsMaterial.sizeAttenuation = true
-pointsMaterial.alphaMap = particleTexture
-pointsMaterial.transparent = true
-pointsMaterial.vertexColors = TextTrackCue
-pointsMaterial.depthWrite = false
-const points = new THREE.Points(pointsGeometry,pointsMaterial)
-scene.add(points)
 
+//Galaxies
+let pointsGeometry = null
+let pointsMaterial = null
+let galaxy = null
+
+const generateGalaxy = () => {
+   //Dispose materials
+   if(galaxy !== null) {
+    pointsGeometry.dispose()
+    pointsMaterial.dispose()
+    scene.remove(galaxy)
+   }
+
+    pointsGeometry = new THREE.BufferGeometry()
+    const positions = new Float32Array(parameters.count * 3)
+
+    for(let i = 0; i< parameters.count *3; i++){
+        const i3 = i * 3
+        const radius = Math.random() * parameters.radius
+        positions[i3 + 0] = radius
+        positions[i3 + 1] = 0
+        positions[i3 + 2] = 0
+    }
+    pointsGeometry.setAttribute('position', new THREE.BufferAttribute(positions,3))
+    pointsMaterial = new THREE.PointsMaterial()
+    pointsMaterial.size = parameters.size
+    pointsMaterial.sizeAttenuation = true
+    pointsMaterial.depthWrite = false
+    pointsMaterial.blending = THREE.AdditiveBlending
+    galaxy = new THREE.Points(pointsGeometry,pointsMaterial)
+    scene.add(galaxy)
+}
+
+generateGalaxy()
+
+gui.add(parameters, 'count').max(100000).min(100).step(1).onFinishChange(generateGalaxy)
+gui.add(parameters, 'size').max(1).min(0.01).step(0.01).onFinishChange(generateGalaxy)
+gui.add(parameters, 'radius').max(20).min(0).step(1).onFinishChange(generateGalaxy)
+gui.add(parameters, 'branches').max(20).min(2).step(1).onFinishChange(generateGalaxy)
 /**
  * Sizes
  */
@@ -104,9 +117,6 @@ const clock = new THREE.Clock()
 
 const tick = () =>
 {
-    const elapsedTime = clock.getElapsedTime()
-    camera.position.x = Math.cos(elapsedTime * 0.5) * 5
-    camera.position.z = Math.sin(elapsedTime * 0.5) * 5
     // Update controls
     controls.update()
 
