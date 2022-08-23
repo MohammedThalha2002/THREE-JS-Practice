@@ -1,15 +1,14 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import * as dat from 'dat.gui'
-import cannon, { Shape } from 'cannon'
 
 /**
- * Debug
+ * Base
  */
+// Debug
 const gui = new dat.GUI()
-
-
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -17,52 +16,9 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-/**
- * Textures
- */
-const textureLoader = new THREE.TextureLoader()
-const cubeTextureLoader = new THREE.CubeTextureLoader()
-
-const environmentMapTexture = cubeTextureLoader.load([
-    '/textures/environmentMaps/0/px.png',
-    '/textures/environmentMaps/0/nx.png',
-    '/textures/environmentMaps/0/py.png',
-    '/textures/environmentMaps/0/ny.png',
-    '/textures/environmentMaps/0/pz.png',
-    '/textures/environmentMaps/0/nz.png'
-])
-
-/**
- * Physics World
- */
- const world = new cannon.World()
- world.gravity.set(0,-9.8,0)
-
- //Adding body
- const sphereShape = new cannon.Sphere(.5)
- const sphereBody = new cannon.Body({
-    mass : 1,
-    position : new cannon.Vec3(0,3,0),
-    shape : sphereShape
- })
-
- world.addBody(sphereBody)
-
-/**
- * Test sphere
- */
-const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    new THREE.MeshStandardMaterial({
-        metalness: 0.3,
-        roughness: 0.4,
-        envMap: environmentMapTexture,
-        envMapIntensity: 0.5
-    })
-)
-sphere.castShadow = true
-sphere.position.y = 0.5
-scene.add(sphere)
+// Models
+const gltfLoader = new GLTFLoader()
+gltfLoader.load('/models/Duck/glTF/Duck.gltf')
 
 /**
  * Floor
@@ -70,11 +26,9 @@ scene.add(sphere)
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 10),
     new THREE.MeshStandardMaterial({
-        color: '#777777',
-        metalness: 0.3,
-        roughness: 0.4,
-        envMap: environmentMapTexture,
-        envMapIntensity: 0.5
+        color: '#444444',
+        metalness: 0,
+        roughness: 0.5
     })
 )
 floor.receiveShadow = true
@@ -84,10 +38,10 @@ scene.add(floor)
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6)
 directionalLight.castShadow = true
 directionalLight.shadow.mapSize.set(1024, 1024)
 directionalLight.shadow.camera.far = 15
@@ -126,11 +80,12 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(- 3, 3, 3)
+camera.position.set(2, 2, 2)
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
+controls.target.set(0, 0.75, 0)
 controls.enableDamping = true
 
 /**
@@ -148,10 +103,13 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Animate
  */
 const clock = new THREE.Clock()
+let previousTime = 0
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
 
     // Update controls
     controls.update()
