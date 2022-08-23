@@ -2,15 +2,15 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import cannon, { Shape } from 'cannon'
 
 /**
  * Debug
  */
 const gui = new dat.GUI()
 
-/**
- * Base
- */
+
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
@@ -31,6 +31,22 @@ const environmentMapTexture = cubeTextureLoader.load([
     '/textures/environmentMaps/0/pz.png',
     '/textures/environmentMaps/0/nz.png'
 ])
+
+/**
+ * Physics World
+ */
+ const world = new cannon.World()
+ world.gravity.set(0,-9.8,0)
+
+ //Adding body
+ const sphereShape = new cannon.Sphere(.5)
+ const sphereBody = new cannon.Body({
+    mass : 1,
+    position : new cannon.Vec3(0,3,0),
+    shape : sphereShape
+ })
+
+ world.addBody(sphereBody)
 
 /**
  * Test sphere
