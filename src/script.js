@@ -1,9 +1,8 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import * as dat from 'lil-gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import * as dat from 'lil-gui'
 
 /**
  * Base
@@ -17,31 +16,23 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-/**
- * Models
- */
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('/draco/')
-
+// GLTF Loader
 const gltfLoader = new GLTFLoader()
-gltfLoader.setDRACOLoader(dracoLoader)
-
-let mixer = null
-
 gltfLoader.load(
-    '/models/Fox/glTF/Fox.gltf',
-    (gltf) =>
-    {
-        gltf.scene.scale.set(0.025, 0.025, 0.025)
-        scene.add(gltf.scene)
-
-        // Animation
-        mixer = new THREE.AnimationMixer(gltf.scene)
-        const action = mixer.clipAction(gltf.animations[2])
-        action.play()
+    '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+    (gltf) => {
+        const childern = [...gltf.scene.children]
+        for(let child of childern){
+            scene.add(child)
+        }
+    },
+    (progress) => {
+        console.log('progress')
+    },
+    (error) => {
+        console.log('error')
     }
-)
-
+    )
 /**
  * Floor
  */
@@ -71,7 +62,7 @@ directionalLight.shadow.camera.left = - 7
 directionalLight.shadow.camera.top = 7
 directionalLight.shadow.camera.right = 7
 directionalLight.shadow.camera.bottom = - 7
-directionalLight.position.set(- 5, 5, 0)
+directionalLight.position.set(5, 5, 5)
 scene.add(directionalLight)
 
 /**
@@ -132,12 +123,6 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
-
-    // Model animation
-    if(mixer)
-    {
-        mixer.update(deltaTime)
-    }
 
     // Update controls
     controls.update()
