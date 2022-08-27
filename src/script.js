@@ -10,6 +10,9 @@ import * as dat from 'lil-gui'
  */
 // Debug
 const gui = new dat.GUI()
+const debugObjects = {
+    envMapIntensity : 5
+}
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -17,62 +20,64 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-//DRACO loader
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('/draco/')
-// GLTF Loader
-let mixer = null;
-const gltfLoader = new GLTFLoader()
-gltfLoader.setDRACOLoader(dracoLoader)
-gltfLoader.load(
-    '/models/House/Portfolio_room.glb',
-    (gltf) => {
-        console.log(gltf)
-        mixer = new THREE.AnimationMixer(gltf.scene)
-        const action = mixer.clipAction(gltf.animations[1])
-        action.play()
+//UpdateEnvironmentMaps 
+const updateEnvironmentMap = () => {
+    scene.traverse((child) => {
+        if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial){
+            child.material.envMap = environmentMap
+            child.material.envMapIntensity = debugObjects.envMapIntensity
+        }
+    })
+}
 
-        const childern = [...gltf.scene.children]
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+const environmentMap = cubeTextureLoader.load([
+    '/textures/environmentMaps/0/px.jpg',
+    '/textures/environmentMaps/0/nx.jpg',
+    '/textures/environmentMaps/0/py.jpg',
+    '/textures/environmentMaps/0/ny.jpg',
+    '/textures/environmentMaps/0/pz.jpg',
+    '/textures/environmentMaps/0/nz.jpg',
+])
+
+scene.background = environmentMap
+
+const gltfLoader = new GLTFLoader()
+
+gltfLoader.load(
+    '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+    (gltf) => {
+        gltf.scene.scale.set(10,10,10)
         scene.add(gltf.scene)
-    },
-    (progress) => {
-        console.log('progress')
+
+        updateEnvironmentMap()
     },
     (error) => {
         console.log('error')
     }
     )
-/**
- * Floor
- */
-const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
-    new THREE.MeshStandardMaterial({
-        color: '#444444',
-        metalness: 0,
-        roughness: 0.5
-    })
-)
-floor.receiveShadow = true
-floor.rotation.x = - Math.PI * 0.5
-scene.add(floor)
+
+
+// const sphereGeometry = new THREE.SphereBufferGeometry(3,32,32)
+// const sphereMaterial = new THREE.MeshStandardMaterial()
+// const sphere = new THREE.Mesh(sphereGeometry,sphereMaterial)
+// scene.add(sphere)
 
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
-scene.add(ambientLight)
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6)
-directionalLight.castShadow = true
-directionalLight.shadow.mapSize.set(1024, 1024)
-directionalLight.shadow.camera.far = 15
-directionalLight.shadow.camera.left = - 7
-directionalLight.shadow.camera.top = 7
-directionalLight.shadow.camera.right = 7
-directionalLight.shadow.camera.bottom = - 7
-directionalLight.position.set(5, 5, 5)
+const directionalLight = new THREE.DirectionalLight('#ffffff', 3)
+directionalLight.position.set(0.25,3, -2.25)
 scene.add(directionalLight)
+
+gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001).name('Light Intensity')
+gui.add(directionalLight.position, 'x').min(-5).max(5).step(0.001).name('lightX')
+gui.add(directionalLight.position, 'y').min(-5).max(5).step(0.001).name('lightY')
+gui.add(directionalLight.position, 'z').min(-5).max(5).step(0.001).name('lightZ')
+gui.add(debugObjects, 'envMapIntensity').min(0).max(10).name("EnvMapIntensity").onFinishChange(updateEnvironmentMap)
+
+const axisHelper = new THREE.AxesHelper(10)
+scene.add(axisHelper)
 
 /**
  * Sizes
@@ -102,7 +107,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(2, 2, 2)
+camera.position.set(0, 2, 10)
 scene.add(camera)
 
 // Controls
@@ -116,10 +121,10 @@ controls.enableDamping = true
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
-renderer.shadowMap.enabled = true
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.physicallyCorrectLights = true
+renderer.outputEncoding = THREE.sRGBEncoding
 
 /**
  * Animate
@@ -132,11 +137,6 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
-
-    //Animation updates
-    if(mixer != null){
-        mixer.update(deltaTime)
-    }
 
     // Update controls
     controls.update()
